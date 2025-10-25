@@ -1,36 +1,58 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { notFound } from 'next/navigation'
+import React, { Suspense } from 'react'
+import { BarLoader } from "react-spinners";
+import { AccountChart } from '../_components/account-chart';
+import { TransactionTable } from '../_components/transaction-table';
+import { getAccAndTransations } from '@/actions/account';
 
-export default function AccountPage({ params }) {
-  const { id } = params;
+const AccountPage = async({ params }) => {
+  const accountInfo = await getAccAndTransations(params.id)
   
+  if(!accountInfo.success){
+    notFound()
+  }
+  
+  const account = accountInfo.data
+  const transactions = account.transactions || []
+
   return (
-    <div className="px-5">
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold">Account Details</h1>
+    <div className="space-y-8 px-5">
+      <div className="flex gap-4 items-end justify-between">
+        <div>
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight gradient-title capitalize">
+            {account.name}
+          </h1>
+          <p className="text-muted-foreground">
+            {account.type.charAt(0) + account.type.slice(1).toLowerCase()}{" "}
+            Account
+          </p>
+        </div>
+
+        <div className="text-right pb-2">
+          <div className="text-xl sm:text-2xl font-bold">
+            ${parseFloat(account.balance).toFixed(2)}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {account._count?.transactions || 0} Transactions
+          </p>
+        </div>
       </div>
-      
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Account ID: {id}</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              This page will show detailed account information and transactions.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+
+      {/* Chart Section */}
+      <Suspense
+        fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
+      >
+        <AccountChart transactions={transactions} />
+      </Suspense>
+
+      {/* Transactions Table */}
+      <Suspense
+        fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
+      >
+        <TransactionTable transactions={transactions} />
+      </Suspense>
     </div>
-  );
+  )
 }
+
+export default AccountPage

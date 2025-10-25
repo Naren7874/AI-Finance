@@ -72,3 +72,26 @@ export async function createAccount(data) {
   }
 }
 
+export async function getUserAccounts() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  const accounts = await prisma.account.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    include: { 
+      _count: { select: { transactions: true }}
+     },
+  });
+
+  const serializedAccounts = accounts.map(serializeTransaction);
+  return serializedAccounts;
+}
