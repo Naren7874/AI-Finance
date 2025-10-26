@@ -95,3 +95,96 @@ export async function getAccAndTransations(accountId) {
     }
   }
 }
+
+export async function bulkDeleteTransactions(transactionIds) {
+  try {
+    if (!Array.isArray(transactionIds) || transactionIds.length === 0) {
+      return { success: false, error: "No transaction IDs provided" };
+    }
+
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await prisma.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+    if (!user) throw new Error("User not found");
+
+    // Fetch transactions to determine how to adjust balances
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        id: { in: transactionIds },
+        userId: user.id,
+      },
+      // include accountId and amount and type
+      select: {
+        id: true,
+        accountId: true,
+        amount: true,
+        type: true,
+      },
+    });
+
+    if (transactions.length === 0) {
+      return { success: false, error: "No transactions found for given IDs" };
+    }
+
+    // Group balance changes per account (as numbers)
+    const accountBalanceChanges = transactions.reduce((acc, tx) => {
+      const amt =
+        typeof tx.amount?.toNumber === "function"
+          ? tx.amount.toNumber()
+          : Number(tx.amount || 0);
+
+      // deleting an EXPENSE should INCREASE the account balance by amt
+      // deleting an INCOME should DECREASE the account balance by amt
+      const change = tx.type === "EXPENSE" ? amt : -amt;
+
+      acc[tx.accountId] = (acc[tx.accountId] || 0) + change;
+      return acc;
+    }, {});
+
+    // Do the delete + balance updates in a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.transaction.deleteMany({
+        where: {
+          id: { in: transactionIds },
+          userId: user.id,
+        },
+      });
+
+      // Update balances for affected accounts
+      for (const [accountId, balanceChange] of Object.entries(
+        accountBalanceChanges
+      )) {
+        // convert balanceChange to number to be safe
+        const changeNum = Number(balanceChange);
+
+        await tx.account.update({
+          where: { id: accountId },
+          data: {
+            balance: {
+              // increment by changeNum (positive or negative)
+              increment: changeNum,
+            },
+          },
+        });
+      }
+    });
+
+    // Revalidate the dashboard and each affected account page
+    revalidatePath("/dashboard");
+    const affectedAccountIds = Object.keys(accountBalanceChanges);
+    for (const accId of affectedAccountIds) {
+      try {
+        revalidatePath(`/account/${accId}`);
+      } catch (err) {
+        console.error(`Failed to revalidate path for account ${accId}:`, err);
+      }
+    }
+    
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error?.message || String(error) };
+  }
+}
