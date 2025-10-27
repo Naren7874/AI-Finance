@@ -77,6 +77,9 @@ html {
   .gradient {
     background: linear-gradient(to bottom right, #2563eb, #9333ea);
   }
+  .gradient-bg{
+    background: linear-gradient(to bottom right, #157f00, #02d1ff);
+  }
   .gradient-title {
     background: linear-gradient(to bottom right, #157f00, #02d1ff);
     font-weight: 800;
