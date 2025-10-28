@@ -35,8 +35,8 @@ export function CreateAccountDrawer({ children }) {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
     reset,
+    control,
   } = useForm({
     resolver: zodResolver(accountSchema),
     defaultValues: {
@@ -67,6 +67,7 @@ export function CreateAccountDrawer({ children }) {
   }, [newAccount, reset]);
 
     const type = useWatch({ control, name: "type" });
+    const isDefault= useWatch({control,name:"isDefault"})
 
   useEffect(() => {
     if (error) {
@@ -157,7 +158,7 @@ export function CreateAccountDrawer({ children }) {
               </div>
               <Switch
                 id="isDefault"
-                checked={watch("isDefault")}
+                checked={isDefault}
                 className="cursor-pointer"
                 onCheckedChange={(checked) => setValue("isDefault", checked)}
               />

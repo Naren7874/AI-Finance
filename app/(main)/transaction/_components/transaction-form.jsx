@@ -45,8 +45,6 @@ const AddTransactionForm = ({
     setValue,
     handleSubmit,
     formState: { errors },
-    watch,
-    getValues,
     reset,
     control,
   } = useForm({
@@ -335,7 +333,7 @@ const AddTransactionForm = ({
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
         <Button
           type="button"
-          variant="outline"new project
+          variant="outline"
           className="flex-1"
           onClick={() => router.back()}
         >
