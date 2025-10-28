@@ -1,12 +1,22 @@
 "use client";
 
-import { createTransaction } from "@/actions/transaction";
+import { createTransaction, updateTransaction } from "@/actions/transaction";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import useFetch from "@/hooks/use-fetch";
 import { transactionSchema } from "@/lib/schema";
@@ -14,14 +24,21 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns/format";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { ReceiptScanner } from "./recipt-scanner";
 
-const AddTransactionForm = ({ accounts, categories }) => {
+const AddTransactionForm = ({
+  accounts,
+  categories,
+  editMode = false,
+  initialData = null,
+}) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
 
   const {
     register,
@@ -33,59 +50,76 @@ const AddTransactionForm = ({ accounts, categories }) => {
     reset,
   } = useForm({
     resolver: zodResolver(transactionSchema),
-    defaultValues: {
-      type: "EXPENSE",
-      amount: "",
-      description: "",
-      accountId: accounts.find((acc) => acc.isDefault)?.id || "",
-      date: new Date(),
-      isRecurring: false,
-    },
+    defaultValues:
+      editMode && initialData
+        ? {
+            type: initialData.type,
+            amount: initialData.amount.toString(),
+            description: initialData.description,
+            accountId: initialData.accountId,
+            category: initialData.category,
+            date: new Date(initialData.date),
+            isRecurring: initialData.isRecurring,
+            ...(initialData.recurringInterval && {
+              recurringInterval: initialData.recurringInterval,
+            }),
+          }
+        : {
+            type: "EXPENSE",
+            amount: "",
+            description: "",
+            accountId: accounts.find((acc) => acc.isDefault)?.id || "",
+            date: new Date(),
+            isRecurring: false,
+          },
   });
-  
+
   const {
     loading: transactionLoading,
     fn: transactionFn,
     data: transactionResult,
     error,
-  } = useFetch(createTransaction);
+  } = useFetch(editMode?updateTransaction:createTransaction);
 
-  const type = watch("type")
-  const isRecurring = watch("isRecurring")
-  const date = watch("date")
+  const type = watch("type");
+  const isRecurring = watch("isRecurring");
+  const date = watch("date");
 
   const filteredCategories = categories.filter(
     (category) => category.type === type
   );
 
-  const onSubmit = async(data) => {
+  const onSubmit = async (data) => {
     const formdata = {
       ...data,
       amount: parseFloat(data.amount),
+    };
+    if(editMode){
+      transactionFn(editId,formdata)
     }
-    transactionFn(formdata)
-  }
+    else transactionFn(formdata);
+  };
 
   // Handle success and error states
   useEffect(() => {
     if (transactionResult && !transactionLoading) {
       if (transactionResult.success) {
-        toast.success("Transaction created successfully")
-        reset()
-        router.push(`/account/${transactionResult.data.accountId}`)
+        toast.success(editMode?"Transaction updated successfully":"Transaction created successfully");
+        reset();
+        router.push(`/account/${transactionResult.data.accountId}`);
       } else {
         // Show error toast when transaction fails
-        toast.error(transactionResult.error || "Failed to create transaction")
+        toast.error(transactionResult.error || "Failed to create transaction");
       }
     }
-  }, [transactionLoading, transactionResult, reset, router])
+  }, [transactionLoading, transactionResult ,editMode, reset, router]);
 
   // Handle fetch errors (network errors, etc.)
   useEffect(() => {
     if (error) {
-      toast.error(error.message || "An error occurred")
+      toast.error(error.message || "An error occurred");
     }
-  }, [error])
+  }, [error]);
 
   const handleScanComplete = (scannedData) => {
     if (scannedData) {
@@ -104,7 +138,7 @@ const AddTransactionForm = ({ accounts, categories }) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
       {/* Type */}
-      <ReceiptScanner onScanComplete={handleScanComplete} />
+      {!editMode &&<ReceiptScanner onScanComplete={handleScanComplete} />}
       <div className="space-y-2">
         <label className="text-sm font-medium">Type</label>
         <Select
@@ -183,7 +217,7 @@ const AddTransactionForm = ({ accounts, categories }) => {
           </SelectTrigger>
           <SelectContent className="max-h-60">
             {filteredCategories.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
+              <SelectItem key={category.id} value={initialData.category.id||category.id}>
                 {category.name}
               </SelectItem>
             ))}
@@ -230,9 +264,9 @@ const AddTransactionForm = ({ accounts, categories }) => {
       {/* Description */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Description</label>
-        <Input 
-          placeholder="Enter description" 
-          {...register("description")} 
+        <Input
+          placeholder="Enter description"
+          {...register("description")}
           className="w-full"
         />
         {errors.description && (
@@ -290,16 +324,14 @@ const AddTransactionForm = ({ accounts, categories }) => {
         >
           Cancel
         </Button>
-        <Button 
-          type="submit" 
-          className="w-full bg-black font-bold text-white sm:flex-1 " 
-          disabled={transactionLoading}
-        >
+         <Button type="submit" className="w-full bg-black text-white" disabled={transactionLoading}>
           {transactionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {editMode ? "Updating..." : "Creating..."}
             </>
+          ) : editMode ? (
+            "Update Transaction"
           ) : (
             "Create Transaction"
           )}
