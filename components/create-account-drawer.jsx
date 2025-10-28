@@ -59,12 +59,14 @@ export function CreateAccountDrawer({ children }) {
   };
 
   useEffect(() => {
-    if (newAccount) {
-      toast.success("Account created successfully");
-      reset();
+  if (newAccount) {
+    toast.success("Account created successfully");
+    reset();
+    setTimeout(() => {
       setOpen(false);
-    }
-  }, [newAccount, reset]);
+    }, 0);
+  }
+}, [newAccount, reset]);
 
     const type = useWatch({ control, name: "type" });
     const isDefault= useWatch({control,name:"isDefault"})
