@@ -217,7 +217,7 @@ const AddTransactionForm = ({
           </SelectTrigger>
           <SelectContent className="max-h-60">
             {filteredCategories.map((category) => (
-              <SelectItem key={category.id} value={initialData.category.id||category.id}>
+              <SelectItem key={category.id} value={initialData?.category.id||category.id}>
                 {category.name}
               </SelectItem>
             ))}
