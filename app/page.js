@@ -18,15 +18,15 @@ const LandingPage = () => {
       <HeroSection />
 
       {/* Stats Section */}
-      <section className="py-20 bg-blue-50">
+      <section className="py-20 bg-green-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {statsData.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
+                <div className="text-4xl font-bold text-primary-600 mb-2">
                   {stat.value}
                 </div>
-                <div className="text-gray-600">{stat.label}</div>
+                <div className="text-neutral-600">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -36,16 +36,28 @@ const LandingPage = () => {
       {/* Features Section */}
       <section id="features" className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-4xl font-bold text-center mb-4 text-neutral-800">
             Everything you need to manage your finances
           </h2>
+          <p className="text-lg text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+            Powerful tools to track, analyze, and optimize your financial health
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuresData.map((feature, index) => (
-              <Card className="p-6" key={index}>
+              <Card 
+                className="p-6 border border-neutral-200 hover:border-primary-300 hover:shadow-lg transition-all duration-300" 
+                key={index}
+              >
                 <CardContent className="space-y-4 pt-4">
-                  {feature.icon}
-                  <h3 className="text-xl font-semibold">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <div className="text-primary-600">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-neutral-800">
+                    {feature.title}
+                  </h3>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -54,17 +66,31 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-blue-50">
+      <section className="py-20 bg-green-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16">How It Works</h2>
+          <h2 className="text-4xl font-bold text-center mb-4 text-neutral-800">
+            How It Works
+          </h2>
+          <p className="text-lg text-neutral-600 text-center mb-16 max-w-2xl mx-auto">
+            Get started in three simple steps and take control of your finances today
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {howItWorksData.map((step, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  {step.icon}
+              <div key={index} className="text-center group">
+                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-200 transition-colors">
+                  <div className="text-primary-600">
+                    {step.icon}
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-4">{step.title}</h3>
-                <p className="text-gray-600">{step.description}</p>
+                <div className="text-sm font-semibold text-primary-600 mb-2">
+                  Step {index + 1}
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-neutral-800">
+                  {step.title}
+                </h3>
+                <p className="text-neutral-600 leading-relaxed">
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
@@ -72,58 +98,47 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20">
+      <section id="testimonials" className="py-20 bg-neutral-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16">
-            What Our Users Say
+          <h2 className="text-4xl font-bold text-center mb-4 text-neutral-800">
+            Trusted by Thousands
           </h2>
+          <p className="text-lg text-neutral-600 text-center mb-16 max-w-2xl mx-auto">
+            See what our users are saying about their financial transformation
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonialsData.map((testimonial, index) => (
-              <Card key={index} className="p-6">
+              <Card 
+                key={index} 
+                className="p-6 border border-neutral-200 hover:shadow-lg transition-shadow"
+              >
                 <CardContent className="pt-4">
                   <div className="flex items-center mb-4">
                     <Image
                       src={testimonial.image}
                       alt={testimonial.name}
-                      width={40}
-                      height={40}
+                      width={48}
+                      height={48}
                       className="rounded-full"
                     />
                     <div className="ml-4">
-                      <div className="font-semibold">{testimonial.name}</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="font-semibold text-neutral-800">
+                        {testimonial.name}
+                      </div>
+                      <div className="text-sm text-neutral-600">
                         {testimonial.role}
                       </div>
                     </div>
                   </div>
-                  <p className="text-gray-600">{testimonial.quote}</p>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {testimonial.quote}
+                  </p>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-blue-600">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Take Control of Your Finances?
-          </h2>
-          <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of users who are already managing their finances
-            smarter with Welth
-          </p>
-          <Link href="/dashboard">
-            <Button
-              size="lg"
-              className="bg-white text-blue-600 hover:bg-blue-50 animate-bounce"
-            >
-              Start Free Trial
-            </Button>
-          </Link>
-        </div>
-      </section>
+      </section>      
     </div>
   );
 };

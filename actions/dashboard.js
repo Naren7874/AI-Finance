@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { date } from "zod";
 
 const serializeTransaction = (obj) => {
   const serialized = { ...obj };
@@ -58,7 +59,7 @@ export async function createAccount(data) {
         ...data,
         balance: balanceFloat,
         userId: user.id,
-        isDefault: shouldBeDefault, 
+        isDefault: shouldBeDefault,
       },
     });
 
@@ -83,15 +84,36 @@ export async function getUserAccounts() {
   if (!user) {
     throw new Error("User not found");
   }
-  
+
   const accounts = await prisma.account.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
-    include: { 
-      _count: { select: { transactions: true }}
-     },
+    include: {
+      _count: { select: { transactions: true } },
+    },
   });
 
   const serializedAccounts = accounts.map(serializeTransaction);
   return serializedAccounts;
+}
+
+export async function getDashboardData() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const transactions = await prisma.transaction.findMany({
+    where:{userId:user.id},
+    orderBy:{
+      date:"desc"
+    },
+  })
+  return transactions.map(serializeTransaction)
 }

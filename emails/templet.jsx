@@ -38,7 +38,6 @@ const PREVIEW_DATA = {
         "Great job keeping entertainment expenses under control this month!",
         "Setting up automatic savings could help you save 20% more of your income.",
       ],
-      topSpendingCategory: "Housing",
     },
   },
   budgetAlert: {
@@ -134,7 +133,7 @@ export default function EmailTemplate({
                         <div key={category} style={styles.categoryItem}>
                           <div style={styles.categoryHeader}>
                             <Text style={styles.categoryName}>{category}</Text>
-                            <Text style={styles.categoryAmount}>₹{amount}</Text>
+                            <Text style={styles.categoryAmount}>₹{amount.toFixed(1)}</Text>
                           </div>
                           <div style={styles.progressBar}>
                             <div
