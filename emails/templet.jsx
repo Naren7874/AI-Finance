@@ -176,7 +176,7 @@ export default function EmailTemplate({
             {/* CTA */}
             <Section style={styles.ctaSection}>
               <Button
-                href="https://your-app.com/dashboard"
+                href="https://wealthwise-by-naren.vercel.app/"
                 style={styles.ctaButton}
               >
                 View Detailed Report
@@ -338,7 +338,7 @@ export default function EmailTemplate({
             {/* CTA */}
             <Section style={styles.ctaSection}>
               <Button
-                href="https://your-app.com/budget"
+                href="https://wealthwise-by-naren.vercel.app/"
                 style={styles.ctaButton}
               >
                 Review Budget
