@@ -55,7 +55,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
       setIsEditing(false);
       toast.success("Budget updated successfully");
     }
-  }, [updatedBudget]);
+  }, [updatedBudget?.success]);
 
   useEffect(() => {
     if (error) {
