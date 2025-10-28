@@ -26,7 +26,7 @@ import { format } from "date-fns/format";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { ReceiptScanner } from "./recipt-scanner";
 
@@ -48,6 +48,7 @@ const AddTransactionForm = ({
     watch,
     getValues,
     reset,
+    control,
   } = useForm({
     resolver: zodResolver(transactionSchema),
     defaultValues:
@@ -74,19 +75,23 @@ const AddTransactionForm = ({
           },
   });
 
+  // Replace watch() with useWatch() for React Compiler compatibility
+  const type = useWatch({ control, name: "type" });
+  const isRecurring = useWatch({ control, name: "isRecurring" });
+  const date = useWatch({ control, name: "date" });
+  const accountId = useWatch({ control, name: "accountId" });
+  const category = useWatch({ control, name: "category" });
+  const recurringInterval = useWatch({ control, name: "recurringInterval" });
+
   const {
     loading: transactionLoading,
     fn: transactionFn,
     data: transactionResult,
     error,
-  } = useFetch(editMode?updateTransaction:createTransaction);
-
-  const type = watch("type");
-  const isRecurring = watch("isRecurring");
-  const date = watch("date");
+  } = useFetch(editMode ? updateTransaction : createTransaction);
 
   const filteredCategories = categories.filter(
-    (category) => category.type === type
+    (categoryItem) => categoryItem.type === type
   );
 
   const onSubmit = async (data) => {
@@ -94,17 +99,22 @@ const AddTransactionForm = ({
       ...data,
       amount: parseFloat(data.amount),
     };
-    if(editMode){
-      transactionFn(editId,formdata)
+    if (editMode) {
+      transactionFn(editId, formdata);
+    } else {
+      transactionFn(formdata);
     }
-    else transactionFn(formdata);
   };
 
   // Handle success and error states
   useEffect(() => {
     if (transactionResult && !transactionLoading) {
       if (transactionResult.success) {
-        toast.success(editMode?"Transaction updated successfully":"Transaction created successfully");
+        toast.success(
+          editMode
+            ? "Transaction updated successfully"
+            : "Transaction created successfully"
+        );
         reset();
         router.push(`/account/${transactionResult.data.accountId}`);
       } else {
@@ -112,7 +122,7 @@ const AddTransactionForm = ({
         toast.error(transactionResult.error || "Failed to create transaction");
       }
     }
-  }, [transactionLoading, transactionResult ,editMode, reset, router]);
+  }, [transactionLoading, transactionResult, editMode, reset, router]);
 
   // Handle fetch errors (network errors, etc.)
   useEffect(() => {
@@ -138,12 +148,13 @@ const AddTransactionForm = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
       {/* Type */}
-      {!editMode &&<ReceiptScanner onScanComplete={handleScanComplete} />}
+      {!editMode && <ReceiptScanner onScanComplete={handleScanComplete} />}
       <div className="space-y-2">
         <label className="text-sm font-medium">Type</label>
         <Select
           onValueChange={(value) => setValue("type", value)}
           defaultValue={type}
+          value={type} // Add value prop for better control
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select type" />
@@ -178,7 +189,8 @@ const AddTransactionForm = ({
           <label className="text-sm font-medium">Account</label>
           <Select
             onValueChange={(value) => setValue("accountId", value)}
-            defaultValue={getValues("accountId")}
+            defaultValue={accountId}
+            value={accountId} // Add value prop for better control
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select account" />
@@ -210,15 +222,19 @@ const AddTransactionForm = ({
         <label className="text-sm font-medium">Category</label>
         <Select
           onValueChange={(value) => setValue("category", value)}
-          defaultValue={getValues("category")}
+          defaultValue={category}
+          value={category} // Add value prop for better control
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent className="max-h-60">
-            {filteredCategories.map((category) => (
-              <SelectItem key={category.id} value={initialData?.category.id||category.id}>
-                {category.name}
+            {filteredCategories.map((categoryItem) => (
+              <SelectItem
+                key={categoryItem.id}
+                value={initialData?.category.id || categoryItem.id}
+              >
+                {categoryItem.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -294,7 +310,8 @@ const AddTransactionForm = ({
           <label className="text-sm font-medium">Recurring Interval</label>
           <Select
             onValueChange={(value) => setValue("recurringInterval", value)}
-            defaultValue={getValues("recurringInterval")}
+            defaultValue={recurringInterval}
+            value={recurringInterval} // Add value prop for better control
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select interval" />
@@ -318,13 +335,17 @@ const AddTransactionForm = ({
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
         <Button
           type="button"
-          variant="outline"
-          className="w-full sm:flex-1"
+          variant="outline"new project
+          className="flex-1"
           onClick={() => router.back()}
         >
           Cancel
         </Button>
-         <Button type="submit" className="w-full bg-black text-white" disabled={transactionLoading}>
+        <Button
+          type="submit"
+          className="bg-black flex-1 text-white"
+          disabled={transactionLoading}
+        >
           {transactionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
