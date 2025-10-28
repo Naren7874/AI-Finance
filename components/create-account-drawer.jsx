@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import useFetch from "@/hooks/use-fetch";
@@ -66,6 +66,8 @@ export function CreateAccountDrawer({ children }) {
     }
   }, [newAccount, reset]);
 
+    const type = useWatch({ control, name: "type" });
+
   useEffect(() => {
     if (error) {
       toast.error(error.message || "Failed to create account");
@@ -107,7 +109,7 @@ export function CreateAccountDrawer({ children }) {
               </label>
               <Select
                 onValueChange={(value) => setValue("type", value)}
-                defaultValue={watch("type")}
+                defaultValue={type}
               >
                 <SelectTrigger id="type">
                   <SelectValue placeholder="Select type" />
