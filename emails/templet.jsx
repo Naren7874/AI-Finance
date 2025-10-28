@@ -91,7 +91,7 @@ export default function EmailTemplate({
                   <div style={styles.metricCard}>
                     <Text style={styles.metricLabel}>Income</Text>
                     <Text style={styles.metricValue}>
-                      ${data?.stats?.totalIncome?.toLocaleString()}
+                      ₹{data?.stats?.totalIncome?.toLocaleString()}
                     </Text>
                   </div>
                 </Column>
@@ -99,7 +99,7 @@ export default function EmailTemplate({
                   <div style={styles.metricCard}>
                     <Text style={styles.metricLabel}>Expenses</Text>
                     <Text style={styles.metricValue}>
-                      ${data?.stats?.totalExpenses?.toLocaleString()}
+                      ₹{data?.stats?.totalExpenses?.toLocaleString()}
                     </Text>
                   </div>
                 </Column>
@@ -107,10 +107,10 @@ export default function EmailTemplate({
                   <div style={{ ...styles.metricCard, ...styles.savingsCard }}>
                     <Text style={styles.metricLabel}>Savings</Text>
                     <Text style={styles.metricValue}>
-                      ${data?.stats?.savings?.toLocaleString()}
+                      ₹{data?.stats?.savings?.toLocaleString()}
                     </Text>
                     <Text style={styles.savingsRate}>
-                      {data?.stats?.savingsRate}% of income
+                      {data?.stats?.savingsRate.toFixed(2)}% of income
                     </Text>
                   </div>
                 </Column>
@@ -134,7 +134,7 @@ export default function EmailTemplate({
                         <div key={category} style={styles.categoryItem}>
                           <div style={styles.categoryHeader}>
                             <Text style={styles.categoryName}>{category}</Text>
-                            <Text style={styles.categoryAmount}>${amount}</Text>
+                            <Text style={styles.categoryAmount}>₹{amount}</Text>
                           </div>
                           <div style={styles.progressBar}>
                             <div
