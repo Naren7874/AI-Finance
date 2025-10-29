@@ -244,8 +244,8 @@ export default function EmailTemplate({
                     color: getAlertColor(),
                   }}
                 >
-                  You've used{" "}
-                  <strong>{data?.percentageUsed.toFixed(2)}%</strong> of your{" "}
+                  You have used{" "}
+                  <strong>{data?.percentageUsed}%</strong> of your{" "}
                   {data?.category} budget
                   {data?.daysLeft &&
                     ` with ${data.daysLeft} days left in the month`}
