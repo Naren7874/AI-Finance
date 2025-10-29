@@ -309,7 +309,7 @@ export default function EmailTemplate({
                   />
                 </div>
                 <Text style={styles.progressPercentage}>
-                  {data?.percentageUsed.toFixed(2)}% used
+                  {data?.percentageUsed}% used
                 </Text>
               </div>
             </Section>
