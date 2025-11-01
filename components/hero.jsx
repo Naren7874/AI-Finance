@@ -4,10 +4,20 @@ import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 
 const HeroSection = () => {
   const imageRef = useRef(null);
+  const { userId } = useAuth();
 
+  const handleGetStarted = () => {
+    if (userId) {
+      window.location.href = "/dashboard";
+    } else {
+      window.location.href = "/sign-in";
+    }
+  };
+  
   useEffect(() => {
     const imageElement = imageRef.current;
 
@@ -37,11 +47,13 @@ const HeroSection = () => {
           analyze, and optimize your spending with real-time insights.
         </p>
         <div className="flex justify-center space-x-4">
-          <Link href="/dashboard">
-            <Button size="lg" className="px-8 bg-black text-white">
-              Get Started
-            </Button>
-          </Link>
+          <Button
+            onClick={handleGetStarted}
+            size="lg"
+            className="px-8 bg-black text-white"
+          >
+            Get Started
+          </Button>
         </div>
         <div className="hero-image-wrapper mt-5 md:mt-0">
           <div ref={imageRef} className="hero-image">
